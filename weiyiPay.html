@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>加入计划</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/media.css"/>
+    <link rel="stylesheet" href="../../css/mui.min.css">
+    <link rel="stylesheet" type="text/css" href="../../fonts/iconfont.css"/>
+    <script src="../../js/utils/cookie.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/common.js" type="text/javascript" charset="utf-8"></script>
+    <style>
+        ::-webkit-input-placeholder {
+            color: #A5A5A5;
+            font-size: 0.7rem;
+        }
+
+        @media screen and (min-width: 300px) and (max-width: 360px) {
+            ::-webkit-input-placeholder {
+                color: #A5A5A5;
+                font-size: 0.6rem;
+            }
+        }
+
+        .realname-color {
+            color: #ff3854;
+            font-size: 0.4rem;
+        }
+
+        .mui-input-group .mui-input-row {
+            font-size: 0.55rem;
+            color: #898989;
+            background: #f4f4f4;
+            width: 90%;
+            margin: auto;
+            margin-top: 0.3rem;
+            border-radius: 10px;
+        }
+
+        .mui-input-group {
+            background:none!important;
+            padding-top: 1rem;
+        }
+
+        body {
+            width: 100%;
+            height: 120%;
+            background: url(../../img/product/hangkong.png) repeat !important;
+            background-size: cover;
+        }
+
+        .point-out P{
+            color:#727272;
+        }
+    </style>
+</head>
+<body>
+
+<div id="anotherArea" v-cloak>
+    <div class="mui-content input-zone weiyi_box">
+        <p class="input-zone-title">系统将依据计划生效时的年龄，自动匹配相应计划</p>
+        <div class="mui-content-padded" style="margin: 0;">
+            <form class="mui-input-group">
+                <div class="mui-input-row">
+                    <label><span class="another-area-color">真实姓名</span></label>
+                    <input type="text" name="real-name" maxlength="22" v-model="activityJoinData.real_name"
+                           placeholder="请与身份证匹配,以便后续互助">
+                </div>
+                <div class="mui-input-row">
+                    <label><span class="another-area-color">身份证号</span></label>
+                    <input type="text" v-model="activityJoinData.id_number" maxlength="18" placeholder="请与姓名匹配,以便后续互助">
+                </div>
+            </form>
+        </div>
+
+
+        <div class="jp-bottom" style="font-size:0.7rem">
+            <div class="deal agreement" style="color:#727272;width:96%;margin: auto">
+                <div class="agreement-list">
+                    <ul>
+                        <li>
+                           <span class="cb">
+						           <input type="checkbox" id="checkbox-1" class="regular-checkbox"
+                                          v-model="state.isReaded"/><label
+                                   for="checkbox-1" :class="{'checkBoxColor': state.isReaded}"
+                                   style="vertical-align:middle"></label>
+					       </span>
+                        </li>
+                        <li>
+                            <label for="checkbox-1">我已阅读并同意</label> 《
+                            <a href="javascript:void(0)" style="color:#727272"
+                               @click="agreementBtn('../protocol/memberConvention.html')">会员公约</a>》和《
+                            <a href="javascript:void(0)" style="color:#727272"
+                               @click="agreementBtn('../protocol/document.html?id=5')">大病医疗互助计划条款</a>》和《<a
+                                href="javascript:void(0)" style="color:#727272"
+                                @click="agreementBtn('../protocol/document.html?id=8')">中老年抗癌互助计划条款</a>》以及
+                            《<a href="javascript:void(0)" style="color:#727272"
+                                @click="agreementBtn('../protocol/contentOfWeiyi.html')">微医健康计划个人版服务内容</a>》和《<a
+                                href="javascript:void(0)" style="color:#727272"
+                                @click="agreementBtn('../protocol/bookOfService.html')">微医健康计划个人版服务手册</a>》和
+                            《<a href="javascript:void(0)" style="color:#727272"
+                                @click="agreementBtn('../protocol/HealthyCommitment.html')">健康承诺书</a>》
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <!--微信充值-->
+                <span>
+                    <a href="javascript:void(0)" v-show="grayShow" class="gray-btn">
+                        <span>充值{{parseFloat(activityJoinData.price)}}元</span>
+                        <!--<span v-else>充值{{joinCount.length*9}}元</span>-->
+                    </a>
+                    <a href="javascript:void(0)" v-else @click="buyForAnother">
+                        <span>充值{{parseFloat(activityJoinData.price)}}元</span>
+                    </a>
+			    </span>
+            </div>
+
+
+            <div class="clearfix"></div>
+            <div class="point-out">
+                <h5>温馨提示</h5>
+                <p>如果年龄超过65周岁，将无法加入互助计划。您可以填写亲友身份信息，我们会将互助计划赠送给TA。关爱身边人，传递健康理念！</p>
+            </div>
+
+            <!--支付弹出页面-->
+            <div class="popup fade-transition" v-show="payShow">
+                <div class="popup-shade"></div>
+                <div class="popup-main" v-show="payShow">
+                    <div class="section" id="section">
+                        <div class="pay-tip" v-show="payTip">
+                            <p>您已提交，请勿重复点击!</p>
+                            <p @click="hide">知道了</p>
+                        </div>
+                        <div class="popup-child pay-btn popup-age expand-transition">
+                            <!--william change-->
+                            <!--微信自带支付-->
+                            <div class="popup-btn" v-show="weChatPay">
+                                <p id="weChatPay" class="pay-one"><img src="../../img/pay-1.png" class="pay-img1"/>微信支付
+                                </p>
+                            </div>
+                            <div class="popup-btn" v-show="pfweixin">
+                                <p id="pfPay" class="pay-one"><img src="../../img/pay-1.png" class="pay-img1"/>微信支付</p>
+                            </div>
+                            <div class="popup-btn" @click="wapWeiXinPay" v-show="wapWeChatPayShow">
+                                <p id="wapWeChatPay" class="pay-one"><img src="../../img/pay-1.png" class="pay-img1"/>微信支付
+                                </p>
+                            </div>
+                            <div class="popup-btn" v-show="zfbPayShow">
+                                <p id="zfbPay" class="pay-one"><img src="../../img/pay-2.png" class="pay-img2"/>支付宝支付
+                                </p>
+                            </div>
+                            <div class="popup-btn" v-show="unionpay">
+                                <p id="unionPay" class="pay-one"><img src="../../img/pay-3.png" class="pay-img3"/>银联支付
+                                </p>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!---------------------------待支付订单弹框------------------------------->
+            <div class="popup fade-transition" v-show="noPayShow">
+                <div class="popup-shade"></div>
+                <div class="popup-main" v-show="noPayShow">
+                    <div class="section" id="section">
+                        <div class="pay-tip nopay-tip" v-show="noPayShow">
+                            <p style="margin-top: 0.3rem;">待支付订单</p>
+                            <div>您有订单还未支付，是否继续</div>
+                            <div class="nopay-left" @click="cancel">取消订单</div>
+                            <div id="conAdd" class="nopay-right" @click="conAdd">继续加入</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-------------------------------判断用户加入计划的类型----------------------------------->
+            <div class="popup fade-transition" v-show="memberShow">
+                <div class="popup-shade"></div>
+                <div class="popup-main" v-show="memberShow">
+                    <div class="section" id="section">
+                        <div class="pay-tip nopay-tip member-tip" v-show="memberShow">
+                            <div class="member-text">{{memberTip}}</div>
+                            <div id="cancelBtn" class="nopay-left" @click="cancelBtn">取消</div>
+                            <div id="ensure" class="nopay-right" @click="ensure">确定</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <popup></popup>
+    </div>
+    <!-------------页面协议弹出框---------------->
+    <div id="page-tip" v-show="agreement">
+        <div class="page-tip"
+             style="display: flex;display: -webkit-flex;-webkit-justify-content: center;justify-content: center;-webkit-align-items: center;align-items: center;">
+            <div class="page-tip-div-iframe">
+                <iframe id="page-tip-iframe" src="" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+            <span class="page-btn" @click="removeBtn">知道了</span>
+        </div>
+    </div>
+
+    <!--确认微信支付是否完成弹窗-->
+    <template v-if="wapWeChatStatus==1">
+        <div class="mask"></div>
+        <div class="checkWeChatPayBox">
+            <div class="wapconfirm_paySuccess">
+                <p>请确认微信支付是否已完成</p>
+            </div>
+            <ul>
+                <li @click="finishedPay">
+                    <p>已完成支付</p>
+                </li>
+                <li @click="queryWapOrder">
+                    <p>失败，重新支付</p>
+                </li>
+            </ul>
+        </div>
+    </template>
+
+</div>
+<script src="../../js/libs/vue.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="../../js/libs/vue-resource.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="../../js/jweixin-1.0.0.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="../../js/commonFunc.js"></script>
+<script>
+    var pageState = {
+        popupShow: false,
+        isReaded: true,
+        isBuy: false,
+        pageShow: false,
+        iframeobj: {},
+        inp: true
+    };
+    new Vue({
+        el: '#anotherArea',
+        data: {
+            main: {},
+            payParam: {},
+            grayShow: false,
+            agreement: false,//协议弹框
+            state: pageState,
+            memberShow: false,
+            noPayShow: false,
+            memberTip: '',
+            addTip: false,
+            payShow: false,
+            wxshow: false,
+            payTip: false,
+            weChatPay: false,//微信支付
+            pfweixin: false,
+            sendOrderId: '',//回调之后的订单号
+            wapWeChatStatus: sessionStorage.getItem('weChatStatus'),
+            wapWeChatPayShow: true,//h5微信支付
+            zfbPayShow: true,
+            unionpay: true,
+            activityJoinData: {//发信贷计划需要传的参数
+                real_name: '',//姓名
+                id_number: '',//证件号
+                price: '365',//价格
+                product_id: '1'//产品id
+            },
+            apiUrl: {
+                checkJoin: common.callService('product/checkJoinedCall'),//2.11判断用户是否已经加入计划接口
+                getWxpay: common.callService('payment/weichatJsApiPay'),//微信支付
+                getWapWxpay: common.callService('payment/weichatH5Pay'),//h5微信支付
+                getzfbpay: common.callService('payment/alipayPay'),//支付宝
+                getOrder: common.callService('userInfo/myTobePaid'),//待支付订单查询接口
+                getCloseTobePaid: common.callService('userInfo/closeTobePaid'),//待支付订单取消接口
+                getCheckProductLimit: common.callService('product/checkProductLimit'),//2.14检查计划准确性提示接口
+                weiyiJoin: common.callService('activationProc/joinActivation'),//微加入计划接口
+                queryWapOrder: common.callService('payment/weichatH5QueryOrder')//查询waph5微信是否已经支付
+            }
+        },
+        ready: function () {
+            this.getOrder();
+        },
+        methods: {
+            getOrder: function () {
+                var vm = this;
+                vm.$http({
+                    method: 'GET',
+                    url: vm.apiUrl.getOrder,
+                    headers: {
+                        'juid': cookie.get('juid')
+                    }
+                }).then(function (response) {
+                    var re = response.json();
+                    if (re.appcode == 0) {
+                        vm.$set('main', re.result);
+                        vm.noPayShow = true;//待支付订单显示
+                        addEvent(
+                            document.getElementById('conAdd'), //目标元素
+                            'click', //监听事件
+                            function () {
+                                location.href = "../plan/noPayShow.html?payment_order_id=" + re.result.payment_order_id;
+                            } //回执函数
+                        );
+                    } else if (re.appcode == 2) {
+                        vm.noPayShow = false;
+                    }
+                });
+            },
+
+            //支付
+            buyForAnother: function () {
+                var vm = this;
+                //判断客户端、微信
+                if (browser.versions.mobile) {//判断是否是移动设备打开。browser代码在下面
+                    var ua = navigator.userAgent.toLowerCase();//获取判断用的对象
+                    if (ua.match(/MicroMessenger/i) == "micromessenger") {
+                        //在微信中打开
+                        vm.pfweixin = true;
+                        vm.weChatPay = true;
+                        vm.zfbPayShow = false;
+                        vm.wapWeChatPayShow = false;
+                    }
+                }
+                vm.state.isBuy = true;
+                //表单验证是否通过
+                //是否阅读协议
+                if (!vm.state.isReaded) {
+                    tip('请先阅读并同意协议');
+                    return;
+                }
+
+                //正则
+                if (!checkName(vm.activityJoinData.real_name)) {
+                    return;
+                }
+                if (!checkIdCard(vm.activityJoinData.id_number)) {
+                    return;
+                }
+                vm.grayShow = true;
+                if (!common.isLogin()) {
+                    pageState.popupShow = true;
+                    return;
+                }
+                //购买支付接口
+                vm.$http.post(
+                    vm.apiUrl.weiyiJoin, {
+                        'product_id': vm.activityJoinData.product_id,
+                        'real_name': vm.activityJoinData.real_name,
+                        'id_number': vm.activityJoinData.id_number,
+                        'price': vm.activityJoinData.price
+                    }, {
+                        emulateJSON: true
+                    }
+                ).then(function (response) {
+                    var re = response.json();
+                    if (re.appcode == 0) {
+                        vm.$set('payParam', re.result);
+                        sessionStorage.setItem('saveOrderId', re.result.payment_order_id);
+                        if (common.isNotNull(re.result.reminderMsg)) {
+                            vm.memberTip = re.result.reminderMsg;
+                            vm.memberShow = true;
+                            //取消
+                            addEvent(
+                                document.getElementById('cancelBtn'), //目标元素
+                                'click', //监听事件
+                                function () {
+                                    vm.memberShow = false;
+                                    vm.grayShow = false;
+                                } //回执函数
+                            );
+                            //确定
+                            addEvent(
+                                document.getElementById('ensure'), //目标元素
+                                'click', //监听事件
+                                function () {
+                                    vm.memberShow = false;
+                                    vm.showPayPanel();
+                                } //回执函数
+                            );
+                        } else if (common.isNull(re.result.reminderMsg)) {
+                            vm.memberShow = false;
+                            vm.showPayPanel();
+                        }
+                    } else {
+                        vm.grayShow = false;
+                        tip(re.appmsg);
+                    }
+                    //end结束
+                });
+            },
+            //协议弹框
+            agreementBtn: function (url) {
+                var _vm = this;
+                _vm.agreement = true;
+                document.getElementById('page-tip-iframe').src = url;
+            },
+            removeBtn: function () {
+                var _vm = this;
+                _vm.agreement = false;
+            },
+            showPayPanel: function () {
+                var vm = this;
+                //支付界面显示
+                vm.payShow = true;
+                var bankPayList = vm.payParam.pay_vendor;
+                vm.$set('bankPayList', bankPayList);
+                if (vm.bankPayList.indexOf('weichatJsAPI') < 0) {
+                    vm.weChatPay = false;
+                }
+                if (vm.bankPayList.indexOf('pfweixin') < 0) {
+                    vm.pfweixin = false;
+                }
+                if (vm.bankPayList.indexOf('unionpay') < 0) {
+                    vm.unionpay = false;
+                }
+                if (vm.bankPayList.indexOf('alipay') < 0) {
+                    vm.zfbPayShow = false;
+                }
+                if (vm.bankPayList.indexOf('weichath5pay') < 0) {//wap微信支付
+                    vm.wapWeChatPayShow = false;
+                }
+                //支付方式
+                //银联支付
+                addEvent(
+                    document.getElementById('unionPay'), //目标元素
+                    'click', //监听事件
+                    function () {
+                        location.href = "../payment/unionpayPay.html?payment_order_id=" + vm.payParam.payment_order_id;
+                    } //回执函数
+                );
+                addEvent(
+                    document.getElementById('pfPay'), //目标元素
+                    'click', //监听事件
+                    function () {
+                        location.href = "../payment/pfPay.html?payment_order_id=" + vm.payParam.payment_order_id;
+                    } //回执函数
+                );
+                //微信支付
+                var clickCount = 0;
+                addEvent(
+                    document.getElementById('weChatPay'), //目标元素
+                    'click', //监听事件
+                    function () { //回执函数
+                        if (clickCount == 0) {
+                            vm.payTip = false;//提交提示信息
+                        } else {
+                            vm.payTip = true;//提交提示信息
+                        }
+                        if (clickCount == 0) { //限制点击次数
+                            clickCount = 1
+                            vm.$http({
+                                method: 'POST',
+                                url: vm.apiUrl.getWxpay,
+                                params: {
+                                    'payment_order_id': vm.payParam.payment_order_id
+                                },
+                                headers: {
+                                    'juid': cookie.get('juid')
+                                }
+                            }).then(function (response) {
+                                var re = response.json();
+                                if (re.result.result_code == "SUCCESS") {
+                                    var appId = re.result.appid;
+                                    var timeStamp = re.result.timeStamp;
+                                    var nonceStr = re.result.nonceStr;
+                                    var pg = re.result.packages;
+                                    var signType = re.result.signType;
+                                    var paySign = re.result.paySign;
+
+                                    function onBridgeReady() {
+                                        WeixinJSBridge.invoke(
+                                            'getBrandWCPayRequest', {
+                                                "appId": appId, //公众号名称，由商户传入
+                                                "timeStamp": timeStamp, //时间戳，自1970年以来的秒数
+                                                "nonceStr": nonceStr, //随机串
+                                                "package": pg,
+                                                "signType": signType, //微信签名方式:
+                                                "paySign": paySign //微信签名
+                                            },
+                                            function (res) {
+                                                if (res.err_msg == "get_brand_wcpay_request:ok") { // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+                                                    location.href = "../payment/weiyiSuccess.html";
+                                                }
+                                                //交易取消
+                                                if (res.err_msg == "get_brand_wcpay_request:cancel") {
+                                                    location.href = "../status/weChatPayError.html";
+                                                }
+                                                //支付失败
+                                                if (res.err_msg == "get_brand_wcpay_request:fail") {
+                                                    location.href = "../status/weChatPayError.html";
+                                                }
+                                            }
+                                        );
+                                    }
+
+                                    //判断微信
+                                    if (typeof WeixinJSBridge == "undefined") {
+                                        if (document.addEventListener) {
+                                            document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+                                        } else if (document.attachEvent) {
+                                            document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+                                            document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+                                        }
+                                    } else {
+                                        onBridgeReady();
+                                    }
+
+                                } else {
+                                    tip(re.appmsg)
+                                }
+
+                            })
+                            //再次提交的时间间隔
+                            setTimeout(function () {
+                                clickCount = 0;
+                            }, 20000);
+                        }
+                    }
+                )
+                //支付宝支付
+                addEvent(
+                    document.getElementById('zfbPay'), //目标元素
+                    'click', //监听事件
+                    function () { //回执函数
+                        if (clickCount == 0) {
+                            vm.payTip = false;//提交提示信息
+                        } else {
+                            vm.payTip = true;//提交提示信息
+                        }
+                        if (clickCount == 0) { //限制点击次数
+                            clickCount = 1
+                            vm.$http({
+                                method: 'POST',
+                                url: vm.apiUrl.getzfbpay,
+                                params: {
+                                    'payment_order_id': vm.payParam.payment_order_id
+                                },
+                                headers: {
+                                    'juid': cookie.get('juid')
+                                }
+                            }).then(function (response) {
+                                var re = response.json();
+                                if (re.appcode == 0) {
+                                    var re = response.json();
+                                    document.write(re.result)
+                                } else {
+                                    tip(re.appmsg)
+                                }
+                            })
+                            //再次提交的时间间隔
+                            setTimeout(function () {
+                                clickCount = 0;
+                            }, 20000);
+                        }
+                    }
+                )
+                // 支付宝支付end
+            },
+            //取消重复点击支付的提示信息
+            hide: function () {
+                var _this = this;
+                _this.payTip = false;
+            },
+            //待支付订单取消按钮
+            cancel: function () {
+                var vm = this;
+                vm.$http({
+                    method: 'GET',
+                    url: vm.apiUrl.getCloseTobePaid,
+                    params: {
+                        'payment_order_id': vm.main.payment_order_id
+                    }
+                }).then(function (response) {
+                    var re = response.json();
+                    vm.noPayShow = false;
+                });
+            },
+            finishedPay: function () {
+                var _this = this;
+                _this.wapWeChatPayShow = '';
+                sessionStorage.removeItem('weChatStatus');
+                setTimeout(function () {
+                    location.href = '../status/wapWeiYiSuccess.html';
+                }, 1000)
+            },
+            //网页微信支付
+            wapWeiXinPay: function () { //回执函数
+                var vm = this;
+                var clickCount = 0;
+                if (clickCount == 0) {
+                    vm.payTip = false; //提交提示信息
+                } else {
+                    vm.payTip = true; //提交提示信息
+                }
+                if (clickCount == 0) { //限制点击次数
+                    clickCount = 1;
+                    sessionStorage.setItem('weChatStatus', 1);
+                    if (vm.wapWeChatStatus) {
+                        vm.sendOrderId = sessionStorage.getItem('saveOrderId')
+                    } else {
+                        vm.sendOrderId = vm.payParam.payment_order_id
+                    }
+                    vm.$http({
+                        method: 'POST',
+                        url: vm.apiUrl.getWapWxpay,
+                        params: {
+                            'payment_order_id': vm.sendOrderId,
+                            'redirect_url': location.href
+                        },
+                        headers: {
+                            'juid': cookie.get('juid')
+                        }
+                    }).then(function (response) {
+                        var re = response.json();
+                        if (re.result.result_code == 'SUCCESS') {
+                            location.href = re.result.mweb_url + '&redirect_url=' + re.result.redirect_url;
+                        } else {
+                            tip(re.appmsg)
+                        }
+                    })
+                    //再次提交的时间间隔
+                    setTimeout(function () {
+                        clickCount = 0;
+                    }, 20000);
+                }
+            },
+            queryWapOrder: function () {
+                var _this = this;
+                _this.noPayShow = false;
+                if (_this.wapWeChatStatus) {
+                    _this.sendOrderId = sessionStorage.getItem('saveOrderId');
+                } else {
+                    _this.sendOrderId = _this.payParam.payment_order_id
+                }
+                var params = {
+                    payment_order_id: _this.sendOrderId
+                }
+                _this.$http.post(_this.apiUrl.queryWapOrder, params, {emulateJSON: true}).then(function (response) {
+                    var dataResult = response.json();
+                    if (dataResult.result == 'success') {
+                        sessionStorage.removeItem('weChatStatus');
+                        _this.wapWeChatStatus = '';
+                        tip('你已经完成支付，不需要再次支付');
+                    }
+                    if (dataResult.result == 'failed') {
+                        _this.wapWeiXinPay();
+                    }
+                })
+            }
+        }
+    });
+    //事件监听
+    function addEvent(element, evnt, funct) {
+        if (element.attachEvent) // IE < 9
+            return element.attachEvent('on' + evnt, funct);
+        else
+            return element.addEventListener(evnt, funct, false);
+    }
+</script>
+
+</body>
+</html>
